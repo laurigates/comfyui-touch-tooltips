@@ -1,0 +1,9 @@
+{
+  "name": "comfyui-touch-tooltips-screenshots",
+  "private": true,
+  "type": "module",
+  "description": "Playwright driver for generating README screenshots of comfyui-touch-tooltips.",
+  "dependencies": {
+    "playwright": "1.49.1"
+  }
+}
