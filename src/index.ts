@@ -448,6 +448,12 @@ function attach(): void {
   let startClientX = 0;
   let startClientY = 0;
 
+  // Listen in the CAPTURE phase: LiteGraph's own canvas pointerdown handler
+  // stops propagation before the bubble phase, so a bubble-phase listener here
+  // would never fire on the real ComfyUI canvas. Capture runs first. passive:
+  // true — we only read the event, never preventDefault.
+  const CAPTURE: AddEventListenerOptions = { capture: true, passive: true };
+
   const cancel = (): void => {
     if (pressTimer) {
       clearTimeout(pressTimer);
@@ -502,7 +508,7 @@ function attach(): void {
         showPopover(screenX, screenY, info.label, info.sub, info.text);
       }, LONG_PRESS_MS);
     },
-    { passive: true },
+    CAPTURE,
   );
 
   el.addEventListener(
@@ -516,12 +522,12 @@ function attach(): void {
         cancel();
       }
     },
-    { passive: true },
+    CAPTURE,
   );
 
-  el.addEventListener("pointerup", cancel, { passive: true });
-  el.addEventListener("pointercancel", cancel, { passive: true });
-  el.addEventListener("pointerleave", cancel, { passive: true });
+  el.addEventListener("pointerup", cancel, CAPTURE);
+  el.addEventListener("pointercancel", cancel, CAPTURE);
+  el.addEventListener("pointerleave", cancel, CAPTURE);
 
   // Dismiss on tap outside the popover.
   document.addEventListener(
