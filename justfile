@@ -47,3 +47,14 @@ test:
 # Lint + typecheck + build + knip + test in one shot.
 [group: "quality"]
 check: lint typecheck build knip test
+
+##########
+# Documentation artifacts
+##########
+
+# Regenerate docs/tooltip.png via the containerized screenshot generator.
+# Builds web/dist first — it's git-ignored, so the Docker COPY needs it present.
+[group: "docs"]
+screenshots: build
+    docker build -f screenshots/Dockerfile -t comfyui-touch-tooltips-screenshots .
+    docker run --rm -v "$(pwd)/docs:/out" comfyui-touch-tooltips-screenshots

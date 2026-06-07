@@ -9,11 +9,20 @@ Long-press tooltips for ComfyUI widgets, sockets, and node titles on touch devic
 > touch-friendly gestures and HTML popovers that replace clunky native
 > LiteGraph interactions, additive and non-clobbering.
 
+![A long-press popover showing the seed widget's tooltip on a KSampler node](docs/tooltip.png)
+
+*Long-press a widget, socket, or node title on a touch device to read its tooltip.*
+
 ## Install
+
+From the Comfy Registry (ships the prebuilt `web/dist/`), or from source:
 
 ```sh
 cd <ComfyUI>/custom_nodes
 git clone https://github.com/laurigates/comfyui-touch-tooltips
+cd comfyui-touch-tooltips
+bun install
+bun run build      # emit web/dist/ (git-ignored; ComfyUI serves it)
 ```
 
 Restart ComfyUI; hard-refresh the browser tab (Ctrl+Shift+R / Cmd+Shift+R).
@@ -37,7 +46,8 @@ before.
 ## Compatibility
 
 - ComfyUI: modern Vue frontend (`comfyui-frontend-package >= 1.40`) for
-  the canvas pointer-event model (`app.canvas`, `ds.scale`/`ds.offset`).
+  the canvas pointer-event model (`app.canvas`, `convertEventToCanvasOffset`,
+  `graph.getNodeOnPos`).
 - Frontend changes (JS/CSS) take effect on browser hard-refresh — no restart.
 
 ## License
