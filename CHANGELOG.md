@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.2...comfyui-touch-tooltips-v0.1.3) (2026-06-08)
+
+
+### Bug Fixes
+
+* ship web/dist in registry tarball (pin publish-node-action skip_checkout) ([#8](https://github.com/laurigates/comfyui-touch-tooltips/issues/8)) ([7d2f6cf](https://github.com/laurigates/comfyui-touch-tooltips/commit/7d2f6cf8b86b0fbf2b61db2d20d62a087ffe305b))
+
 ## [0.1.2](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.1...comfyui-touch-tooltips-v0.1.2) (2026-06-08)
 
 
