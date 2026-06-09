@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.3...comfyui-touch-tooltips-v0.1.4) (2026-06-09)
+
+
+### Bug Fixes
+
+* **registry:** ship runtime-only files in the Comfy Registry tarball ([#10](https://github.com/laurigates/comfyui-touch-tooltips/issues/10)) ([83e2622](https://github.com/laurigates/comfyui-touch-tooltips/commit/83e26224a1e99e1ea9c239a4d393ffb7b3fb1615))
+
 ## [0.1.3](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.2...comfyui-touch-tooltips-v0.1.3) (2026-06-08)
 
 
