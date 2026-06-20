@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.5](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.4...comfyui-touch-tooltips-v0.1.5) (2026-06-20)
+
+
+### Bug Fixes
+
+* pin comfyui-frontend-package to 3-part version (&gt;=1.40.0) ([#15](https://github.com/laurigates/comfyui-touch-tooltips/issues/15)) ([ee6c8c0](https://github.com/laurigates/comfyui-touch-tooltips/commit/ee6c8c07771eae624f40d1d61d88f32a854a16be))
+
+
+### Miscellaneous
+
+* **deps:** remove Dependabot config, consolidate on Renovate ([#14](https://github.com/laurigates/comfyui-touch-tooltips/issues/14)) ([5885273](https://github.com/laurigates/comfyui-touch-tooltips/commit/588527345397fb55540bf4924d4ec4ae68d52758))
+
 ## [0.1.4](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.3...comfyui-touch-tooltips-v0.1.4) (2026-06-09)
 
 
