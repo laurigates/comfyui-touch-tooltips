@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.5...comfyui-touch-tooltips-v0.1.6) (2026-06-26)
+
+
+### Bug Fixes
+
+* **dist:** commit web/dist so git-based updates carry the built frontend ([#21](https://github.com/laurigates/comfyui-touch-tooltips/issues/21)) ([e396a28](https://github.com/laurigates/comfyui-touch-tooltips/commit/e396a284884d1b945444a805a54bcd70f28e5c6c))
+
 ## [0.1.5](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.4...comfyui-touch-tooltips-v0.1.5) (2026-06-20)
 
 
