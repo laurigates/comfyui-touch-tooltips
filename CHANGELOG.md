@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.7](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.6...comfyui-touch-tooltips-v0.1.7) (2026-06-28)
+
+
+### Miscellaneous
+
+* sync uv.lock and auto-bump it via release-please ([#24](https://github.com/laurigates/comfyui-touch-tooltips/issues/24)) ([80c51aa](https://github.com/laurigates/comfyui-touch-tooltips/commit/80c51aa59c3324d03276c8590e35e0ebf5917d84))
+
 ## [0.1.6](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.5...comfyui-touch-tooltips-v0.1.6) (2026-06-26)
 
 
