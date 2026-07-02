@@ -1,3 +1,21 @@
+// node_modules/@laurigates/comfy-modal-kit/dist/index.js
+var KEY = Symbol.for("laurigates.comfyModalKit");
+function getKit() {
+  const g = globalThis;
+  let kit = g[KEY];
+  if (!kit) {
+    kit = { fieldProviders: [], activeModal: null, pointerClaim: null };
+    g[KEY] = kit;
+  }
+  return kit;
+}
+function isModalActive() {
+  return getKit().activeModal !== null;
+}
+function claimPointer(id) {
+  getKit().pointerClaim = id;
+}
+
 // src/index.ts
 import { app } from "/scripts/app.js";
 var LONG_PRESS_MS = 450;
@@ -242,6 +260,8 @@ function attach() {
   el.addEventListener("pointerdown", (e) => {
     if (e.pointerType === "mouse" && !ENABLE_FOR_MOUSE)
       return;
+    if (isModalActive())
+      return;
     startClientX = e.clientX;
     startClientY = e.clientY;
     cancel();
@@ -281,6 +301,7 @@ function attach() {
       const info = resolveTooltipForHit(node, hit);
       if (!info)
         return;
+      claimPointer("touch-tooltips");
       showPopover(screenX, screenY, info.label, info.sub, info.text);
     }, LONG_PRESS_MS);
   }, CAPTURE);

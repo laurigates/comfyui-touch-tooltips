@@ -27,6 +27,7 @@
 // keeps it unbundled); the type is supplied via a `paths` mapping in
 // tsconfig.json that points the import at `src/comfyui-shims.d.ts`.
 
+import { claimPointer, isModalActive } from "@laurigates/comfy-modal-kit";
 import { app } from "/scripts/app.js";
 
 // Tunables
@@ -465,6 +466,11 @@ function attach(): void {
     "pointerdown",
     (e: PointerEvent) => {
       if (e.pointerType === "mouse" && !ENABLE_FOR_MOUSE) return;
+      // Pointer-claim protocol (comfy-modal-kit): if any pack has a modal
+      // open, don't start a long-press. Defense-in-depth — a canvas-scoped
+      // listener usually can't fire over a full-screen modal backdrop anyway,
+      // but the veto makes the deference explicit and robust.
+      if (isModalActive()) return;
       startClientX = e.clientX;
       startClientY = e.clientY;
       cancel();
@@ -505,6 +511,10 @@ function attach(): void {
 
         const info = resolveTooltipForHit(node, hit);
         if (!info) return;
+        // A real long-press tooltip is committed — claim the pointer so peer
+        // packs can observe who owns this gesture (advisory; part of the
+        // comfy-modal-kit pointer-claim protocol).
+        claimPointer("touch-tooltips");
         showPopover(screenX, screenY, info.label, info.sub, info.text);
       }, LONG_PRESS_MS);
     },
