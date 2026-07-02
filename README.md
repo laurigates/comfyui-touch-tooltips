@@ -2,9 +2,14 @@
 
 Long-press tooltips for ComfyUI widgets, sockets, and node titles on touch devices.
 
-> Part of a family of mobile-first ComfyUI usability packs
+> Part of a family of mobile-first ComfyUI usability packs, built on
+> [comfy-modal-kit](https://github.com/laurigates/comfy-modal-kit)
 > ([gallery-loader](https://github.com/laurigates/comfyui-gallery-loader),
+> [model-gallery](https://github.com/laurigates/comfyui-model-gallery),
+> [prompt-editor](https://github.com/laurigates/comfyui-prompt-editor),
 > [sampler-info](https://github.com/laurigates/comfyui-sampler-info),
+> [touch-connect](https://github.com/laurigates/comfyui-touch-connect),
+> [touch-numeric](https://github.com/laurigates/comfyui-touch-numeric),
 > [touch-resize](https://github.com/laurigates/comfyui-touch-resize)):
 > touch-friendly gestures and HTML popovers that replace clunky native
 > LiteGraph interactions, additive and non-clobbering.
@@ -22,7 +27,7 @@ cd <ComfyUI>/custom_nodes
 git clone https://github.com/laurigates/comfyui-touch-tooltips
 cd comfyui-touch-tooltips
 bun install
-bun run build      # emit web/dist/ (git-ignored; ComfyUI serves it)
+bun run build      # emit web/dist/ (generated, git-tracked; ComfyUI serves it)
 ```
 
 Restart ComfyUI; hard-refresh the browser tab (Ctrl+Shift+R / Cmd+Shift+R).
