@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.8](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.7...comfyui-touch-tooltips-v0.1.8) (2026-07-02)
+
+
+### Features
+
+* adopt kit pointer-claim protocol (isModalActive veto + claimPointer) ([#28](https://github.com/laurigates/comfyui-touch-tooltips/issues/28)) ([91cfd9a](https://github.com/laurigates/comfyui-touch-tooltips/commit/91cfd9a2930c58010fbd771e5d63093da787b505))
+
 ## [0.1.7](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.6...comfyui-touch-tooltips-v0.1.7) (2026-06-28)
 
 
