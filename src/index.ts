@@ -1,8 +1,9 @@
 // Touch Tooltips — ComfyUI frontend extension (canvas-gesture pack).
 //
 // Served at /extensions/comfyui-touch-tooltips/index.js — the pack directory
-// name IS this URL segment. Do not rename the pack dir without syncing
-// EXT_NAME below.
+// name IS this URL segment (independent of EXT_NAME, which is the extension's
+// registration id and console-log prefix). Renaming the pack dir breaks every
+// fetch of the served file.
 //
 // Pattern ("the tooltip vein"): touch devices have no hover, so the rich
 // tooltip metadata ComfyUI declares on widgets/sockets/nodes is invisible on
@@ -30,12 +31,21 @@
 import { claimPointer, isModalActive } from "@laurigates/comfy-modal-kit";
 import { app } from "/scripts/app.js";
 
+// The extension registration id and the prefix stamped on every console line
+// this pack emits ([comfy.touch-tooltips]). Matches the touch-resize sibling's
+// [EXT_NAME] console convention.
+const EXT_NAME = "comfy.touch-tooltips";
+
 // Tunables
 const LONG_PRESS_MS = 450;
 const MOVE_TOLERANCE_PX = 10;
 const SOCKET_HIT_RADIUS_PX = 14;
 const POPOVER_ID = "ttt-popover";
 const STYLE_ID = "ttt-style";
+// attach() polls for app.canvas at this cadence; bound the retries so a canvas
+// that never materializes surfaces a single diagnostic instead of looping forever.
+const ATTACH_RETRY_MS = 250;
+const ATTACH_MAX_RETRIES = 40; // ~10s of polling before giving up
 
 // Set to true to also trigger on mouse (useful for dev/testing on desktop).
 const ENABLE_FOR_MOUSE = false;
@@ -230,8 +240,10 @@ export function widgetHeight(node: GraphNode, w: Widget): number {
       const sz = w.computeSize(node.size?.[0] ?? 200);
       if (Array.isArray(sz) && typeof sz[1] === "number" && sz[1] > 0) return sz[1];
     }
-  } catch (_) {
-    /* ignore */
+  } catch (err) {
+    // Defensive fallback to the constant height below — a throwing computeSize
+    // must not break hit-testing, but make the fallback observable.
+    console.warn(`[${EXT_NAME}] widget.computeSize threw; using default height`, err);
   }
   const lg =
     (typeof window !== "undefined" &&
@@ -280,8 +292,10 @@ export function hitTestSocket(node: GraphNode, gx: number, gy: number): SocketHi
         if (dx * dx + dy * dy <= r2) {
           return { isInput, index: i, slot: slots[i] };
         }
-      } catch (_) {
-        /* ignore */
+      } catch (err) {
+        // A throwing getConnectionPos skips this slot rather than aborting the
+        // whole hit-test; surface it so the skipped slot is observable.
+        console.warn(`[${EXT_NAME}] getConnectionPos threw; skipping slot ${i}`, err);
       }
     }
     return null;
@@ -437,11 +451,17 @@ function showPopover(x: number, y: number, label: string, sub: string, text: str
   el.style.top = `${top}px`;
 }
 
-function attach(): void {
+function attach(attempt = 0): void {
   const canvas = app.canvas as unknown as CanvasLike | undefined;
   const el = canvas?.canvas;
   if (!canvas || !el) {
-    setTimeout(attach, 250);
+    if (attempt >= ATTACH_MAX_RETRIES) {
+      console.warn(
+        `[${EXT_NAME}] app.canvas never materialized after ${ATTACH_MAX_RETRIES} attempts — long-press tooltips not installed`,
+      );
+      return;
+    }
+    setTimeout(() => attach(attempt + 1), ATTACH_RETRY_MS);
     return;
   }
 
@@ -481,7 +501,8 @@ function attach(): void {
         let graphPos: Vec2 | null | undefined;
         try {
           graphPos = canvas.convertEventToCanvasOffset(e);
-        } catch (_) {
+        } catch (err) {
+          console.warn(`[${EXT_NAME}] convertEventToCanvasOffset threw; ignoring long-press`, err);
           return;
         }
         if (!graphPos) return;
@@ -553,10 +574,14 @@ function attach(): void {
   document.addEventListener("keydown", (e: KeyboardEvent) => {
     if (e.key === "Escape") dismissPopover();
   });
+
+  console.log(
+    `[${EXT_NAME}] long-press tooltip layer installed — long-press a widget, socket, or title`,
+  );
 }
 
 app.registerExtension({
-  name: "comfy.touch-tooltips",
+  name: EXT_NAME,
   async setup() {
     ensureStyle();
     attach();
