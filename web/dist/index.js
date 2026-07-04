@@ -18,11 +18,14 @@ function claimPointer(id) {
 
 // src/index.ts
 import { app } from "/scripts/app.js";
+var EXT_NAME = "comfy.touch-tooltips";
 var LONG_PRESS_MS = 450;
 var MOVE_TOLERANCE_PX = 10;
 var SOCKET_HIT_RADIUS_PX = 14;
 var POPOVER_ID = "ttt-popover";
 var STYLE_ID = "ttt-style";
+var ATTACH_RETRY_MS = 250;
+var ATTACH_MAX_RETRIES = 40;
 var ENABLE_FOR_MOUSE = false;
 var CSS = `
 #${POPOVER_ID} {
@@ -93,7 +96,9 @@ function widgetHeight(node, w) {
       if (Array.isArray(sz) && typeof sz[1] === "number" && sz[1] > 0)
         return sz[1];
     }
-  } catch (_) {}
+  } catch (err) {
+    console.warn(`[${EXT_NAME}] widget.computeSize threw; using default height`, err);
+  }
   const lg = typeof window !== "undefined" && window.LiteGraph || null;
   return lg?.NODE_WIDGET_HEIGHT || 20;
 }
@@ -131,7 +136,9 @@ function hitTestSocket(node, gx, gy) {
         if (dx * dx + dy * dy <= r2) {
           return { isInput, index: i, slot: slots[i] };
         }
-      } catch (_) {}
+      } catch (err) {
+        console.warn(`[${EXT_NAME}] getConnectionPos threw; skipping slot ${i}`, err);
+      }
     }
     return null;
   };
@@ -240,11 +247,15 @@ function showPopover(x, y, label, sub, text) {
   el.style.left = `${left}px`;
   el.style.top = `${top}px`;
 }
-function attach() {
+function attach(attempt = 0) {
   const canvas = app.canvas;
   const el = canvas?.canvas;
   if (!canvas || !el) {
-    setTimeout(attach, 250);
+    if (attempt >= ATTACH_MAX_RETRIES) {
+      console.warn(`[${EXT_NAME}] app.canvas never materialized after ${ATTACH_MAX_RETRIES} attempts — long-press tooltips not installed`);
+      return;
+    }
+    setTimeout(() => attach(attempt + 1), ATTACH_RETRY_MS);
     return;
   }
   let pressTimer = null;
@@ -272,7 +283,8 @@ function attach() {
       let graphPos;
       try {
         graphPos = canvas.convertEventToCanvasOffset(e);
-      } catch (_) {
+      } catch (err) {
+        console.warn(`[${EXT_NAME}] convertEventToCanvasOffset threw; ignoring long-press`, err);
         return;
       }
       if (!graphPos)
@@ -326,9 +338,10 @@ function attach() {
     if (e.key === "Escape")
       dismissPopover();
   });
+  console.log(`[${EXT_NAME}] long-press tooltip layer installed — long-press a widget, socket, or title`);
 }
 app.registerExtension({
-  name: "comfy.touch-tooltips",
+  name: EXT_NAME,
   async setup() {
     ensureStyle();
     attach();
