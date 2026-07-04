@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.9](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.8...comfyui-touch-tooltips-v0.1.9) (2026-07-04)
+
+
+### Bug Fixes
+
+* **instrumentation:** add [EXT_NAME] console logging + bounded attach retries ([#31](https://github.com/laurigates/comfyui-touch-tooltips/issues/31)) ([0fafe27](https://github.com/laurigates/comfyui-touch-tooltips/commit/0fafe27d948d4a4e6ada741ff948c42e981d6653))
+
 ## [0.1.8](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.7...comfyui-touch-tooltips-v0.1.8) (2026-07-02)
 
 
