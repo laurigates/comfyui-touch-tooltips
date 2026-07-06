@@ -1,4 +1,14 @@
 // node_modules/@laurigates/comfy-modal-kit/dist/index.js
+function ensureStyleOnce(id, css) {
+  if (typeof document === "undefined")
+    return;
+  if (document.getElementById(id))
+    return;
+  const s = document.createElement("style");
+  s.id = id;
+  s.textContent = css;
+  document.head.appendChild(s);
+}
 var KEY = Symbol.for("laurigates.comfyModalKit");
 function getKit() {
   const g = globalThis;
@@ -18,7 +28,7 @@ function claimPointer(id) {
 
 // src/index.ts
 import { app } from "/scripts/app.js";
-var EXT_NAME = "comfy.touch-tooltips";
+var EXT_NAME = "comfyui-touch-tooltips";
 var LONG_PRESS_MS = 450;
 var MOVE_TOLERANCE_PX = 10;
 var SOCKET_HIT_RADIUS_PX = 14;
@@ -202,14 +212,6 @@ function clampPopover(x, y, w, h, vw, vh) {
     top = 8;
   return { left, top };
 }
-function ensureStyle() {
-  if (document.getElementById(STYLE_ID))
-    return;
-  const style = document.createElement("style");
-  style.id = STYLE_ID;
-  style.textContent = CSS;
-  document.head.appendChild(style);
-}
 function dismissPopover() {
   const el = document.getElementById(POPOVER_ID);
   if (el)
@@ -341,9 +343,9 @@ function attach(attempt = 0) {
   console.log(`[${EXT_NAME}] long-press tooltip layer installed — long-press a widget, socket, or title`);
 }
 app.registerExtension({
-  name: EXT_NAME,
+  name: "comfy.touch-tooltips",
   async setup() {
-    ensureStyle();
+    ensureStyleOnce(STYLE_ID, CSS);
     attach();
   }
 });
