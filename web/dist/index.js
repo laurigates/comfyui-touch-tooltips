@@ -1,14 +1,4 @@
 // node_modules/@laurigates/comfy-modal-kit/dist/index.js
-function ensureStyleOnce(id, css) {
-  if (typeof document === "undefined")
-    return;
-  if (document.getElementById(id))
-    return;
-  const s = document.createElement("style");
-  s.id = id;
-  s.textContent = css;
-  document.head.appendChild(s);
-}
 var KEY = Symbol.for("laurigates.comfyModalKit");
 function getKit() {
   const g = globalThis;
@@ -18,6 +8,16 @@ function getKit() {
     g[KEY] = kit;
   }
   return kit;
+}
+function ensureStyleOnce(id, css) {
+  if (typeof document === "undefined")
+    return;
+  if (document.getElementById(id))
+    return;
+  const s = document.createElement("style");
+  s.id = id;
+  s.textContent = css;
+  document.head.appendChild(s);
 }
 function isModalActive() {
   return getKit().activeModal !== null;
