@@ -1,9 +1,8 @@
 // Touch Tooltips — ComfyUI frontend extension (canvas-gesture pack).
 //
 // Served at /extensions/comfyui-touch-tooltips/index.js — the pack directory
-// name IS this URL segment (independent of EXT_NAME, which is the extension's
-// registration id and console-log prefix). Renaming the pack dir breaks every
-// fetch of the served file.
+// name IS this URL segment (EXT_NAME mirrors it, per the family convention).
+// Renaming the pack dir breaks every fetch of the served file.
 //
 // Pattern ("the tooltip vein"): touch devices have no hover, so the rich
 // tooltip metadata ComfyUI declares on widgets/sockets/nodes is invisible on
@@ -19,8 +18,8 @@
 // hitTestSocket, hitTestTitle, resolveTooltipForHit, clampPopover) that take
 // plain LiteGraph-node data and return plain results. They never touch `app`
 // and only `widgetHeight`/`hitTestTitle` read `window.LiteGraph` (defensively),
-// so they are unit-tested in tests/js. The DOM wiring (ensureStyle,
-// dismissPopover, showPopover, attach) is a thin adapter: events → hit data,
+// so they are unit-tested in tests/js. The DOM wiring (dismissPopover,
+// showPopover, attach) is a thin adapter: events → hit data,
 // resolved tooltip → popover. It is exercised in the manual browser matrix.
 //
 // ComfyUI serves its frontend API at runtime from `/scripts/app.js`. The
@@ -28,13 +27,14 @@
 // keeps it unbundled); the type is supplied via a `paths` mapping in
 // tsconfig.json that points the import at `src/comfyui-shims.d.ts`.
 
-import { claimPointer, isModalActive } from "@laurigates/comfy-modal-kit";
+import { claimPointer, ensureStyleOnce, isModalActive } from "@laurigates/comfy-modal-kit";
 import { app } from "/scripts/app.js";
 
-// The extension registration id and the prefix stamped on every console line
-// this pack emits ([comfy.touch-tooltips]). Matches the touch-resize sibling's
-// [EXT_NAME] console convention.
-const EXT_NAME = "comfy.touch-tooltips";
+// The pack-dir/URL segment and the prefix stamped on every console line this
+// pack emits ([comfyui-touch-tooltips]) — the family convention (kit
+// ADR-0002). The registerExtension name below stays the historical
+// "comfy.touch-tooltips" so users' enable/disable state is preserved.
+const EXT_NAME = "comfyui-touch-tooltips";
 
 // Tunables
 const LONG_PRESS_MS = 450;
@@ -392,14 +392,6 @@ export function clampPopover(
 
 // --- DOM adapter (browser-matrix tested) -------------------------------- //
 
-function ensureStyle(): void {
-  if (document.getElementById(STYLE_ID)) return;
-  const style = document.createElement("style");
-  style.id = STYLE_ID;
-  style.textContent = CSS;
-  document.head.appendChild(style);
-}
-
 function dismissPopover(): void {
   const el = document.getElementById(POPOVER_ID);
   if (el) el.remove();
@@ -581,9 +573,11 @@ function attach(attempt = 0): void {
 }
 
 app.registerExtension({
-  name: EXT_NAME,
+  // Historical registration id — NOT EXT_NAME. Renaming it would reset
+  // users' extension enable/disable state.
+  name: "comfy.touch-tooltips",
   async setup() {
-    ensureStyle();
+    ensureStyleOnce(STYLE_ID, CSS);
     attach();
   },
 });
