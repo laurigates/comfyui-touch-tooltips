@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.10](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.9...comfyui-touch-tooltips-v0.1.10) (2026-07-17)
+
+
+### Bug Fixes
+
+* **registry:** shrink registry tarball scan surface + hygiene guard ([#35](https://github.com/laurigates/comfyui-touch-tooltips/issues/35)) ([8841510](https://github.com/laurigates/comfyui-touch-tooltips/commit/88415109d2919e6de8cfa51f1bc6df2583761dad))
+
 ## [0.1.9](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.8...comfyui-touch-tooltips-v0.1.9) (2026-07-04)
 
 
