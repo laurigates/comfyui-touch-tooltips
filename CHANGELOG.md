@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.11](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.10...comfyui-touch-tooltips-v0.1.11) (2026-07-30)
+
+
+### Features
+
+* **assets:** restyle the banner to the vector family ([#40](https://github.com/laurigates/comfyui-touch-tooltips/issues/40)) ([8ea3a47](https://github.com/laurigates/comfyui-touch-tooltips/commit/8ea3a4748ccc2c5823511970f9062dc5bffbd546))
+
 ## [0.1.10](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.9...comfyui-touch-tooltips-v0.1.10) (2026-07-17)
 
 
