@@ -78,7 +78,8 @@ check: lint typecheck build knip test
 ##########
 
 # Regenerate docs/tooltip.png via the containerized screenshot generator.
-# Builds web/dist first — it's git-ignored, so the Docker COPY needs it present.
+# Builds web/dist first so the Docker COPY picks up the current source. web/dist
+# is TRACKED (CI runs `git diff --exit-code -- web/dist`), not git-ignored.
 [group: "docs"]
 screenshots: build
     docker build -f screenshots/Dockerfile -t comfyui-touch-tooltips-screenshots .

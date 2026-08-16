@@ -32,6 +32,7 @@ function claimPointer(id) {
 import { app } from "/scripts/app.js";
 var EXT_NAME = "comfyui-touch-tooltips";
 var LONG_PRESS_MS = 450;
+var NATIVE_CONTEXT_MENU_MS = 600;
 var MOVE_TOLERANCE_PX = 10;
 var SOCKET_HIT_RADIUS_PX = 14;
 var POPOVER_ID = "ttt-popover";
@@ -262,15 +263,50 @@ function attach(attempt = 0) {
     setTimeout(() => attach(attempt + 1), ATTACH_RETRY_MS);
     return;
   }
-  let pressTimer = null;
+  let pressEvent = null;
+  let pressStartMs = 0;
   let startClientX = 0;
   let startClientY = 0;
   const CAPTURE = { capture: true, passive: true };
   const cancel = () => {
-    if (pressTimer) {
-      clearTimeout(pressTimer);
-      pressTimer = null;
+    pressEvent = null;
+  };
+  const commit = (down, screenX, screenY) => {
+    let graphPos;
+    try {
+      graphPos = canvas.convertEventToCanvasOffset(down);
+    } catch (err) {
+      console.warn(`[${EXT_NAME}] convertEventToCanvasOffset threw; ignoring long-press`, err);
+      return;
     }
+    if (!graphPos)
+      return;
+    const [gx, gy] = graphPos;
+    const nodeList = canvas.visible_nodes || canvas.graph?._nodes || [];
+    const node = canvas.graph?.getNodeOnPos ? canvas.graph.getNodeOnPos(gx, gy, nodeList) : null;
+    if (!node)
+      return;
+    const lx = gx - node.pos[0];
+    const ly = gy - node.pos[1];
+    const socketHit = hitTestSocket(node, gx, gy);
+    let hit = null;
+    if (socketHit) {
+      hit = { type: "socket", socket: socketHit };
+    } else {
+      const widget = hitTestWidget(node, lx, ly);
+      if (widget) {
+        hit = { type: "widget", widget };
+      } else if (hitTestTitle(node, lx, ly)) {
+        hit = { type: "title" };
+      }
+    }
+    if (!hit)
+      return;
+    const info = resolveTooltipForHit(node, hit);
+    if (!info)
+      return;
+    claimPointer("touch-tooltips");
+    showPopover(screenX, screenY, info.label, info.sub, info.text);
   };
   el.addEventListener("pointerdown", (e) => {
     if (e.pointerType === "mouse" && !ENABLE_FOR_MOUSE)
@@ -279,56 +315,30 @@ function attach(attempt = 0) {
       return;
     startClientX = e.clientX;
     startClientY = e.clientY;
+    pressStartMs = Date.now();
+    pressEvent = e;
+  }, CAPTURE);
+  el.addEventListener("pointerup", () => {
+    const down = pressEvent;
+    const screenX = startClientX;
+    const screenY = startClientY;
     cancel();
-    const screenX = e.clientX;
-    const screenY = e.clientY;
-    pressTimer = setTimeout(() => {
-      pressTimer = null;
-      let graphPos;
-      try {
-        graphPos = canvas.convertEventToCanvasOffset(e);
-      } catch (err) {
-        console.warn(`[${EXT_NAME}] convertEventToCanvasOffset threw; ignoring long-press`, err);
-        return;
-      }
-      if (!graphPos)
-        return;
-      const [gx, gy] = graphPos;
-      const nodeList = canvas.visible_nodes || canvas.graph?._nodes || [];
-      const node = canvas.graph?.getNodeOnPos ? canvas.graph.getNodeOnPos(gx, gy, nodeList) : null;
-      if (!node)
-        return;
-      const lx = gx - node.pos[0];
-      const ly = gy - node.pos[1];
-      const socketHit = hitTestSocket(node, gx, gy);
-      let hit = null;
-      if (socketHit) {
-        hit = { type: "socket", socket: socketHit };
-      } else {
-        const widget = hitTestWidget(node, lx, ly);
-        if (widget) {
-          hit = { type: "widget", widget };
-        } else if (hitTestTitle(node, lx, ly)) {
-          hit = { type: "title" };
-        }
-      }
-      if (!hit)
-        return;
-      const info = resolveTooltipForHit(node, hit);
-      if (!info)
-        return;
-      claimPointer("touch-tooltips");
-      showPopover(screenX, screenY, info.label, info.sub, info.text);
-    }, LONG_PRESS_MS);
+    if (!down)
+      return;
+    const heldMs = Date.now() - pressStartMs;
+    if (heldMs < LONG_PRESS_MS)
+      return;
+    if (heldMs >= NATIVE_CONTEXT_MENU_MS)
+      return;
+    commit(down, screenX, screenY);
   }, CAPTURE);
   el.addEventListener("pointermove", (e) => {
-    if (!pressTimer)
+    if (!pressEvent)
       return;
     if (Math.abs(e.clientX - startClientX) > MOVE_TOLERANCE_PX || Math.abs(e.clientY - startClientY) > MOVE_TOLERANCE_PX) {
       cancel();
     }
   }, CAPTURE);
-  el.addEventListener("pointerup", cancel, CAPTURE);
   el.addEventListener("pointercancel", cancel, CAPTURE);
   el.addEventListener("pointerleave", cancel, CAPTURE);
   document.addEventListener("pointerdown", (e) => {

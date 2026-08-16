@@ -8,7 +8,10 @@
 // tooltip metadata ComfyUI declares on widgets/sockets/nodes is invisible on
 // mobile. This pack adds a CANVAS-LEVEL long-press handler that hit-tests the
 // tap against the node under it (socket → widget → title, in that precedence)
-// and surfaces the matching tooltip text in a dismissible popover. Additive +
+// and surfaces the matching tooltip text in a dismissible popover. The popover
+// is committed ON RELEASE, for a press whose duration lands between
+// LONG_PRESS_MS and NATIVE_CONTEXT_MENU_MS, so it can never coincide with
+// LiteGraph's own long-press context menu (issue #6). Additive +
 // mobile-first: if app.canvas or the pointer model is absent it does nothing,
 // and it never mutates the graph (read-only hit-testing + a transient DOM
 // popover) so no workflow can break.
@@ -20,7 +23,10 @@
 // and only `widgetHeight`/`hitTestTitle` read `window.LiteGraph` (defensively),
 // so they are unit-tested in tests/js. The DOM wiring (dismissPopover,
 // showPopover, attach) is a thin adapter: events → hit data,
-// resolved tooltip → popover. It is exercised in the manual browser matrix.
+// resolved tooltip → popover. Its gesture semantics — the press window, the
+// move/cancel bail-outs — are pinned in the jsdom tier
+// (tests/js/long-press-gesture.test.js); everything about how the gesture FEELS
+// stays in the manual browser matrix.
 //
 // ComfyUI serves its frontend API at runtime from `/scripts/app.js`. The
 // emitted import string stays `/scripts/app.js` (bun's `--external '/scripts/*'`
@@ -38,6 +44,20 @@ const EXT_NAME = "comfyui-touch-tooltips";
 
 // Tunables
 const LONG_PRESS_MS = 450;
+// ComfyUI's own `Comfy.SimpleTouchSupport` opens LiteGraph's context menu for a
+// single-touch press it measures — at `touchend`, against the same wall clock —
+// as lasting MORE than this many milliseconds:
+//
+//   if (new Date().getTime() - touchTime.getTime() > 600) { ...dispatch a
+//   synthetic button-2 pointerdown/pointerup pair on the canvas... }
+//
+// (ComfyUI_frontend `src/extensions/core/simpleTouchSupport.ts:62` at 1.51.2;
+// the same `>600` gate is in the shipped comfyui_frontend_package 1.47.9
+// bundle.) A press we commit on release BELOW this bound therefore cannot also
+// open the native menu, and a press held past it is left entirely to the native
+// menu — the two gestures are complementary intervals of one clock rather than
+// two handlers racing on the same hold. See issue #6.
+const NATIVE_CONTEXT_MENU_MS = 600;
 const MOVE_TOLERANCE_PX = 10;
 const SOCKET_HIT_RADIUS_PX = 14;
 const POPOVER_ID = "ttt-popover";
@@ -457,7 +477,11 @@ function attach(attempt = 0): void {
     return;
   }
 
-  let pressTimer: ReturnType<typeof setTimeout> | null = null;
+  // The armed gesture: the pointerdown that started it, when it started, and
+  // where. `pressEvent` is non-null exactly while a press is still a tooltip
+  // candidate; a move past tolerance or a pointercancel/leave clears it.
+  let pressEvent: PointerEvent | null = null;
+  let pressStartMs = 0;
   let startClientX = 0;
   let startClientY = 0;
 
@@ -468,10 +492,53 @@ function attach(attempt = 0): void {
   const CAPTURE: AddEventListenerOptions = { capture: true, passive: true };
 
   const cancel = (): void => {
-    if (pressTimer) {
-      clearTimeout(pressTimer);
-      pressTimer = null;
+    pressEvent = null;
+  };
+
+  /**
+   * Commit the tooltip for the armed press: hit-test the ORIGINAL pointerdown
+   * position (the gesture's anchor, not wherever the finger drifted to) and
+   * show the popover. Called only from the release path, and only for a press
+   * whose duration is in the window this pack owns.
+   */
+  const commit = (down: PointerEvent, screenX: number, screenY: number): void => {
+    let graphPos: Vec2 | null | undefined;
+    try {
+      graphPos = canvas.convertEventToCanvasOffset(down);
+    } catch (err) {
+      console.warn(`[${EXT_NAME}] convertEventToCanvasOffset threw; ignoring long-press`, err);
+      return;
     }
+    if (!graphPos) return;
+    const [gx, gy] = graphPos;
+    const nodeList = canvas.visible_nodes || canvas.graph?._nodes || [];
+    const node = canvas.graph?.getNodeOnPos ? canvas.graph.getNodeOnPos(gx, gy, nodeList) : null;
+    if (!node) return;
+
+    const lx = gx - node.pos[0];
+    const ly = gy - node.pos[1];
+
+    const socketHit = hitTestSocket(node, gx, gy);
+    let hit: Hit | null = null;
+    if (socketHit) {
+      hit = { type: "socket", socket: socketHit };
+    } else {
+      const widget = hitTestWidget(node, lx, ly);
+      if (widget) {
+        hit = { type: "widget", widget };
+      } else if (hitTestTitle(node, lx, ly)) {
+        hit = { type: "title" };
+      }
+    }
+    if (!hit) return;
+
+    const info = resolveTooltipForHit(node, hit);
+    if (!info) return;
+    // A real long-press tooltip is committed — claim the pointer so peer
+    // packs can observe who owns this gesture (advisory; part of the
+    // comfy-modal-kit pointer-claim protocol).
+    claimPointer("touch-tooltips");
+    showPopover(screenX, screenY, info.label, info.sub, info.text);
   };
 
   el.addEventListener(
@@ -485,51 +552,30 @@ function attach(attempt = 0): void {
       if (isModalActive()) return;
       startClientX = e.clientX;
       startClientY = e.clientY;
+      pressStartMs = Date.now();
+      pressEvent = e;
+    },
+    CAPTURE,
+  );
+
+  el.addEventListener(
+    "pointerup",
+    () => {
+      const down = pressEvent;
+      const screenX = startClientX;
+      const screenY = startClientY;
       cancel();
-      const screenX = e.clientX;
-      const screenY = e.clientY;
-      pressTimer = setTimeout(() => {
-        pressTimer = null;
-        let graphPos: Vec2 | null | undefined;
-        try {
-          graphPos = canvas.convertEventToCanvasOffset(e);
-        } catch (err) {
-          console.warn(`[${EXT_NAME}] convertEventToCanvasOffset threw; ignoring long-press`, err);
-          return;
-        }
-        if (!graphPos) return;
-        const [gx, gy] = graphPos;
-        const nodeList = canvas.visible_nodes || canvas.graph?._nodes || [];
-        const node = canvas.graph?.getNodeOnPos
-          ? canvas.graph.getNodeOnPos(gx, gy, nodeList)
-          : null;
-        if (!node) return;
-
-        const lx = gx - node.pos[0];
-        const ly = gy - node.pos[1];
-
-        const socketHit = hitTestSocket(node, gx, gy);
-        let hit: Hit | null = null;
-        if (socketHit) {
-          hit = { type: "socket", socket: socketHit };
-        } else {
-          const widget = hitTestWidget(node, lx, ly);
-          if (widget) {
-            hit = { type: "widget", widget };
-          } else if (hitTestTitle(node, lx, ly)) {
-            hit = { type: "title" };
-          }
-        }
-        if (!hit) return;
-
-        const info = resolveTooltipForHit(node, hit);
-        if (!info) return;
-        // A real long-press tooltip is committed — claim the pointer so peer
-        // packs can observe who owns this gesture (advisory; part of the
-        // comfy-modal-kit pointer-claim protocol).
-        claimPointer("touch-tooltips");
-        showPopover(screenX, screenY, info.label, info.sub, info.text);
-      }, LONG_PRESS_MS);
+      if (!down) return;
+      const heldMs = Date.now() - pressStartMs;
+      // Too short: an ordinary tap, which belongs to LiteGraph.
+      if (heldMs < LONG_PRESS_MS) return;
+      // Too long: at this duration ComfyUI's own touchend handler opens
+      // LiteGraph's context menu, so the gesture is NOT ours. Bailing out here
+      // is the whole separation — we never suppress the native menu (the
+      // listeners stay passive and nothing is preventDefault-ed), we just
+      // decline the presses it has already claimed.
+      if (heldMs >= NATIVE_CONTEXT_MENU_MS) return;
+      commit(down, screenX, screenY);
     },
     CAPTURE,
   );
@@ -537,7 +583,7 @@ function attach(attempt = 0): void {
   el.addEventListener(
     "pointermove",
     (e: PointerEvent) => {
-      if (!pressTimer) return;
+      if (!pressEvent) return;
       if (
         Math.abs(e.clientX - startClientX) > MOVE_TOLERANCE_PX ||
         Math.abs(e.clientY - startClientY) > MOVE_TOLERANCE_PX
@@ -548,7 +594,6 @@ function attach(attempt = 0): void {
     CAPTURE,
   );
 
-  el.addEventListener("pointerup", cancel, CAPTURE);
   el.addEventListener("pointercancel", cancel, CAPTURE);
   el.addEventListener("pointerleave", cancel, CAPTURE);
 
