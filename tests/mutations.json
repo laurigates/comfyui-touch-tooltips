@@ -1,0 +1,42 @@
+{
+  "command": ["bun", "run", "test"],
+  "reporter": "vitest-json",
+  "mutations": [
+    {
+      "label": "the native-context-menu upper bound is dropped (a >600ms press pops a tooltip UNDER LiteGraph's menu again — issue #6)",
+      "file": "src/index.ts",
+      "before": "      if (heldMs >= NATIVE_CONTEXT_MENU_MS) return;\n",
+      "after": ""
+    },
+    {
+      "label": "the long-press floor is dropped (an ordinary tap pops a tooltip)",
+      "file": "src/index.ts",
+      "before": "      if (heldMs < LONG_PRESS_MS) return;\n",
+      "after": ""
+    },
+    {
+      "label": "the move-tolerance check always says \"did not move\" (a pan pops a tooltip)",
+      "file": "src/index.ts",
+      "before": "        Math.abs(e.clientX - startClientX) > MOVE_TOLERANCE_PX ||\n        Math.abs(e.clientY - startClientY) > MOVE_TOLERANCE_PX",
+      "after": "        false"
+    },
+    {
+      "label": "the pointercancel listener is removed (an interrupted gesture still commits)",
+      "file": "src/index.ts",
+      "before": "  el.addEventListener(\"pointercancel\", cancel, CAPTURE);\n",
+      "after": ""
+    },
+    {
+      "label": "commit() is inert (nothing ever fires) — pins that every \"does not fire\" assertion has a live positive beside it",
+      "file": "src/index.ts",
+      "before": "  const commit = (down: PointerEvent, screenX: number, screenY: number): void => {\n    let graphPos",
+      "after": "  const commit = (down: PointerEvent, screenX: number, screenY: number): void => {\n    if (down) return;\n    let graphPos"
+    },
+    {
+      "label": "CONTROL — comment text only; MUST be MISSED, or this harness is lying",
+      "file": "src/index.ts",
+      "before": "      // Too short: an ordinary tap, which belongs to LiteGraph.",
+      "after": "      // Too short to be a press: an ordinary tap, which LiteGraph owns."
+    }
+  ]
+}

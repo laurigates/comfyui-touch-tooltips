@@ -77,7 +77,13 @@ type gate; `bun build` is the emit. The two are decoupled — `tsc` never emits,
   `/extensions/comfyui-touch-tooltips/index.js`. The served URL therefore moves
   from the old `/extensions/comfyui-touch-tooltips/js/touch-tooltips.js` to
   `/extensions/comfyui-touch-tooltips/index.js`. `EXT_NAME` is unchanged.
-- **Distribution**: `web/dist/` is git-ignored (it is generated). The Comfy
+- **Distribution**: `web/dist/` is generated but **committed**. This ADR
+  originally recorded it as git-ignored; that was reversed in `e396a28`
+  ("fix(dist): commit web/dist so git-based updates carry the built frontend",
+  #21) because ComfyUI-Manager updates over `git fetch && merge --ff-only`,
+  which cannot pull an ignored path — the update reports success while ComfyUI
+  keeps serving the stale bundle. CI gates freshness with
+  `git diff --exit-code -- web/dist`. The Comfy
   Registry tarball includes it via `[tool.comfy] includes = ["web/dist"]`, and
   CI (`publish.yml`) runs `bun run build` before `publish-node-action` so the
   artifact exists at publish time.
