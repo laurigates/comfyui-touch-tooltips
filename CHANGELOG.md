@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.12](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.11...comfyui-touch-tooltips-v0.1.12) (2026-08-16)
+
+
+### Miscellaneous
+
+* **ci:** guard registry-health against closing on Pending; drop duplicate Renovate runner ([#42](https://github.com/laurigates/comfyui-touch-tooltips/issues/42)) ([6b9e018](https://github.com/laurigates/comfyui-touch-tooltips/commit/6b9e0182c68a5029443e9b5ffcf0d302d4b647a2))
+
 ## [0.1.11](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.10...comfyui-touch-tooltips-v0.1.11) (2026-07-30)
 
 
