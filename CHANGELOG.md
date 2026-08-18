@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.13](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.12...comfyui-touch-tooltips-v0.1.13) (2026-08-18)
+
+
+### Bug Fixes
+
+* commit the tooltip on release, inside the window LiteGraph's menu leaves free ([4c5a857](https://github.com/laurigates/comfyui-touch-tooltips/commit/4c5a857455747cb747890d4adce971a648a7330a))
+* separate the long-press tooltip from LiteGraph's native context menu ([#44](https://github.com/laurigates/comfyui-touch-tooltips/issues/44)) ([4c5a857](https://github.com/laurigates/comfyui-touch-tooltips/commit/4c5a857455747cb747890d4adce971a648a7330a))
+
 ## [0.1.12](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.11...comfyui-touch-tooltips-v0.1.12) (2026-08-16)
 
 
