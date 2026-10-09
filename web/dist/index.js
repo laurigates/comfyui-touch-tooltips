@@ -362,12 +362,12 @@ app.registerExtension({
   }
 });
 export {
-  widgetHeight,
-  tooltipFromInputSpec,
-  resolveTooltipForHit,
-  lookupInputSpec,
-  hitTestWidget,
-  hitTestTitle,
+  clampPopover,
   hitTestSocket,
-  clampPopover
+  hitTestTitle,
+  hitTestWidget,
+  lookupInputSpec,
+  resolveTooltipForHit,
+  tooltipFromInputSpec,
+  widgetHeight
 };
