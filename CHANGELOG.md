@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.15](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.14...comfyui-touch-tooltips-v0.1.15) (2026-11-16)
+
+
+### Bug Fixes
+
+* **types:** move @comfyorg/comfyui-frontend-types to ^1.60.0 ([#63](https://github.com/laurigates/comfyui-touch-tooltips/issues/63)) ([e63d4f2](https://github.com/laurigates/comfyui-touch-tooltips/commit/e63d4f262beb2b21e57e28eeb3deba57cd84fdd8))
+
 ## [0.1.14](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.13...comfyui-touch-tooltips-v0.1.14) (2026-10-23)
 
 
