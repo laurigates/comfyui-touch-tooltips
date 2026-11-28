@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.16](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.15...comfyui-touch-tooltips-v0.1.16) (2026-11-26)
+
+
+### Bug Fixes
+
+* **deps:** update dependency playwright to v1.55.1 [security] ([#56](https://github.com/laurigates/comfyui-touch-tooltips/issues/56)) ([b83fa9d](https://github.com/laurigates/comfyui-touch-tooltips/commit/b83fa9dbf95cafd900598ed5ca86204681d2412b))
+
+
+### Miscellaneous
+
+* **claude:** reconcile Claude Code config with the repo baseline ([#60](https://github.com/laurigates/comfyui-touch-tooltips/issues/60)) ([5a2dc13](https://github.com/laurigates/comfyui-touch-tooltips/commit/5a2dc1381408dedc174d44c18d0e3c266fd390b9))
+* **deps:** update dependency virtualenv to v21.14.10 [security] ([#65](https://github.com/laurigates/comfyui-touch-tooltips/issues/65)) ([7e3f8b3](https://github.com/laurigates/comfyui-touch-tooltips/commit/7e3f8b3833ae334f4af8f7c7509b29d95808ba45))
+
 ## [0.1.15](https://github.com/laurigates/comfyui-touch-tooltips/compare/comfyui-touch-tooltips-v0.1.14...comfyui-touch-tooltips-v0.1.15) (2026-11-16)
 
 
